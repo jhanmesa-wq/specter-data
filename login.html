@@ -232,8 +232,11 @@ input::placeholder{
 
   <h2 id="formTitle">Bienvenido de nuevo</h2>
   <p class="subtitle" id="formSubtitle">Ingresa con tus credenciales</p>
-
-  <div class="tabs">
+  <!-- Botón para pausar / reproducir la música -->
+<button type="button" class="music-btn" id="musicBtn">🎵 <span id="musicLabel">Reproducir música</span></button>
+<audio id="bgMusic" loop preload="auto"></audio>
+  
+ <div class="tabs">
     <button class="tab-btn active" id="tabLogin" type="button">Ingresar</button>
     <button class="tab-btn" id="tabRegister" type="button">Registrarse</button>
   </div>
