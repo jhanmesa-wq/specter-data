@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d11">
+  <title>SPECTER DATA — Panel</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b0d11;--sidebar:#10151c;--surface:#121821;--surface-2:#171f2a;--surface-3:#0e131a;--line:#27313e;--text:#f2f4f7;--muted:#8995a5;--muted-2:#687586;--accent:#e87932;--accent-light:#f29a5f;--green:#41c28a;--red:#f07878;--shadow:0 18px 50px rgba(0,0,0,.22)}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .app{display:flex;width:100%;height:100dvh;min-height:0}
+    .sidebar{width:282px;flex:0 0 282px;display:flex;flex-direction:column;background:var(--sidebar);border-right:1px solid var(--line);transition:width .24s ease,flex-basis .24s ease,margin .24s ease;z-index:30;min-height:0}
+    body.sidebar-collapsed .sidebar{width:0;flex-basis:0;margin-left:-1px;overflow:hidden;border:0}
+    .side-head{height:82px;flex:0 0 82px;padding:0 21px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+    .brand-icon{width:39px;height:39px;flex:0 0 39px;border:1px solid rgba(232,121,50,.48);border-radius:12px;display:grid;place-items:center;color:var(--accent-light);background:rgba(232,121,50,.09)}
+    .brand-icon svg{width:23px;height:23px}
+    .brand-word{font-size:14px;font-weight:800;letter-spacing:1.55px;white-space:nowrap}
+    .brand-caption{display:block;margin-top:4px;color:var(--muted);font-size:9px;letter-spacing:1.6px;font-weight:650}
+    .side-scroll{flex:1;overflow:auto;padding:19px 12px 14px}
+    .nav-label{padding:0 11px;margin:0 0 10px;color:var(--muted-2);font-size:9px;font-weight:750;letter-spacing:1.65px;text-transform:uppercase}
+    .nav-list{list-style:none;padding:0;margin:0}
+    .nav-item{width:100%;min-height:46px;display:flex;align-items:center;gap:12px;margin:3px 0;padding:0 12px;border:1px solid transparent;border-radius:9px;background:transparent;color:#bac3ce;text-align:left;font-size:12px;font-weight:600;transition:background .16s,border-color .16s,color .16s}
+    .nav-item:hover{background:rgba(255,255,255,.035);color:#fff}
+    .nav-item.active{background:rgba(232,121,50,.10);border-color:rgba(232,121,50,.22);color:#fff}
+    .nav-icon{width:20px;text-align:center;font-size:16px}
+    .nav-cost{margin-left:auto;color:var(--accent-light);font-size:10px;font-weight:750;white-space:nowrap}
+    .side-note{margin:18px 7px 5px;padding:12px;border:1px solid rgba(232,121,50,.16);border-radius:9px;background:rgba(232,121,50,.045);color:#aeb7c2;font-size:10px;line-height:1.55}
+    .side-bottom{padding:15px 17px 17px;border-top:1px solid var(--line);background:rgba(0,0,0,.1)}
+    .wallet-label{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:9px;font-weight:750;letter-spacing:1.4px}
+    .wallet-status{padding:4px 7px;border:1px solid rgba(65,194,138,.25);border-radius:5px;color:var(--green);font-size:8px;letter-spacing:.8px}
+    .wallet-value{margin:9px 0 13px;font-size:25px;font-weight:800;letter-spacing:-.8px;color:#fff;font-variant-numeric:tabular-nums}
+    .wallet-value span{font-size:10px;color:var(--accent-light);letter-spacing:1px}
+    .buy-button{width:100%;min-height:40px;border:1px solid rgba(232,121,50,.45);border-radius:8px;background:rgba(232,121,50,.10);color:#ffc08f;font-size:11px;font-weight:750;transition:background .15s}
+    .buy-button:hover{background:rgba(232,121,50,.19)}
+    .main{display:flex;flex:1;min-width:0;min-height:0;flex-direction:column;background:radial-gradient(ellipse at 78% -10%,rgba(232,121,50,.07),transparent 37%),var(--bg)}
+    .topbar{height:70px;flex:0 0 70px;display:flex;align-items:center;gap:15px;padding:0 28px;border-bottom:1px solid var(--line);background:rgba(16,21,28,.84)}
+    .icon-button{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:#151c26;color:#dce2e9;font-size:18px}
+    .icon-button:hover{border-color:#526073;background:#1b2430}
+    .top-title{min-width:0;flex:1}
+    .top-title h1{overflow:hidden;margin:0;color:#f5f6f8;font-size:14px;font-weight:720;white-space:nowrap;text-overflow:ellipsis}
+    .top-title p{margin:4px 0 0;color:var(--muted);font-size:10px}
+    .top-actions{display:flex;align-items:center;gap:9px}
+    .user-email{max-width:195px;overflow:hidden;color:#aab4c1;font-size:11px;text-overflow:ellipsis;white-space:nowrap}
+    .top-credits{display:none;padding:7px 10px;border:1px solid var(--line);border-radius:8px;color:#ffc08f;font-size:11px;font-weight:750;white-space:nowrap}
+    .logout{height:35px;padding:0 11px;border:1px solid var(--line);border-radius:8px;background:transparent;color:#bac3ce;font-size:10px;font-weight:650}
+    .logout:hover{color:white;border-color:#647184}
+    .content{flex:1;overflow:auto;padding:30px clamp(16px,3vw,42px) 45px}
+    .page-wrap{width:min(100%,1120px);margin:0 auto}
+    .page-intro{margin:0 0 22px}
+    .overline{margin:0 0 8px;color:var(--accent-light);font-size:9px;font-weight:750;letter-spacing:1.8px;text-transform:uppercase}
+    .page-intro h2{margin:0;font-size:25px;font-weight:750;letter-spacing:-.7px}
+    .page-intro p{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+    .panel{border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.025),transparent 35%),var(--surface);box-shadow:var(--shadow)}
+    .request-panel{padding:24px}
+    .panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:21px}
+    .panel-heading h3{margin:0;font-size:15px;font-weight:720}
+    .panel-heading p{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.55}
+    .cost-pill{flex:0 0 auto;padding:6px 9px;border:1px solid rgba(232,121,50,.25);border-radius:6px;background:rgba(232,121,50,.075);color:#ffb47b;font-size:10px;font-weight:750;white-space:nowrap}
+    .form-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;max-width:660px}
+    .field label{display:block;margin:0 0 8px;color:#bcc5d0;font-size:10px;font-weight:700;letter-spacing:.7px}
+    .field input{width:100%;height:47px;padding:0 13px;border:1px solid var(--line);border-radius:8px;outline:none;background:var(--surface-3);color:#f4f6f8;font-size:13px;transition:border-color .2s,box-shadow .2s}
+    .field input::placeholder{color:#647181}
+    .field input:focus{border-color:rgba(232,121,50,.75);box-shadow:0 0 0 3px rgba(232,121,50,.10)}
+    .action-row{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:21px;padding-top:18px;border-top:1px solid var(--line)}
+    .cost-text{color:var(--muted);font-size:10px}
+    .cost-text strong{color:var(--accent-light);font-weight:750}
+    .primary{min-height:41px;padding:0 17px;border:0;border-radius:8px;background:linear-gradient(110deg,#cf6528,#ed8846);color:#fff;font-size:11px;font-weight:750;box-shadow:0 7px 20px rgba(232,121,50,.14);transition:filter .15s,transform .15s}
+    .primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+    .primary:disabled{opacity:.65;cursor:wait;transform:none}
+    .feedback{display:none;margin-top:15px;padding:11px 13px;border:1px solid var(--line);border-radius:8px;font-size:11px;line-height:1.5}
+    .feedback.error{display:block;border-color:rgba(240,120,120,.25);background:rgba(127,29,29,.14);color:#fecaca}
+    .feedback.success{display:block;border-color:rgba(65,194,138,.22);background:rgba(20,83,45,.14);color:#bbf7d0}
+    .results{margin-top:19px}
+    .result-card{overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--surface);animation:appear .2s ease-out}
+    @keyframes appear{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 17px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.018)}
+    .result-head strong{font-size:11px;font-weight:750}
+    .result-head span{color:var(--muted);font-size:9px}
+    .result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:16px}
+    .result-item{min-width:0;padding:11px 12px;border:1px solid rgba(255,255,255,.055);border-radius:8px;background:var(--surface-3)}
+    .result-item small{display:block;margin-bottom:6px;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase}
+    .result-item strong{display:block;overflow-wrap:anywhere;color:#edf0f4;font-size:12px;font-weight:620}
+    .admin-panel{display:none;margin-top:24px;padding:22px}
+    .admin-panel.visible{display:block}
+    .admin-title{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+    .admin-title h3{margin:0;font-size:14px}
+    .admin-badge{padding:4px 7px;border:1px solid rgba(65,194,138,.23);border-radius:5px;color:var(--green);font-size:8px;font-weight:750;letter-spacing:.7px}
+    .admin-desc{margin:0 0 19px;color:var(--muted);font-size:11px;line-height:1.5}
+    .admin-form{display:grid;grid-template-columns:minmax(180px,1.5fr) minmax(110px,.7fr) minmax(150px,1fr) auto;align-items:end;gap:11px}
+    .admin-form .field input{height:42px}
+    .admin-form .primary{height:42px;white-space:nowrap}
+    .history{margin-top:20px;border-top:1px solid var(--line);padding-top:15px}
+    .history h4{margin:0 0 10px;font-size:10px;color:#c4ccd6;letter-spacing:.8px;text-transform:uppercase}
+    .history-list{display:grid;gap:7px}
+    .history-row{display:flex;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:7px;background:var(--surface-3);color:var(--muted);font-size:10px}
+    .history-row strong{color:var(--green);white-space:nowrap}
+    .empty-state{padding:26px 12px;color:var(--muted);font-size:11px;text-align:center}
+    .sidebar-scrim{display:none}
+    @media(min-width:1050px){.top-credits{display:block}}
+    @media(max-width:850px){
+      .sidebar{position:fixed;top:0;bottom:0;left:0;width:min(84vw,310px);flex-basis:min(84vw,310px);transform:translateX(-105%);transition:transform .23s ease;box-shadow:18px 0 55px rgba(0,0,0,.38)}
+      body.menu-open .sidebar{transform:translateX(0)}
+      body.sidebar-collapsed .sidebar{width:min(84vw,310px);flex-basis:min(84vw,310px);margin-left:0;overflow:visible;border-right:1px solid var(--line)}
+      .sidebar-scrim{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.6);backdrop-filter:blur(2px)}
+      body.menu-open .sidebar-scrim{display:block}
+      .topbar{height:62px;flex-basis:62px;padding:0 14px;gap:10px}
+      .top-title h1{font-size:12px}
+      .top-title p{font-size:9px}
+      .user-email{display:none}
+      .top-credits{display:block}
+      .content{padding:22px 15px 35px}
+      .page-intro h2{font-size:22px}
+    }
+    @media(max-width:560px){
+      .topbar{gap:8px}
+      .top-actions{gap:6px}
+      .logout{height:33px;padding:0 8px;font-size:9px}
+      .top-credits{padding:7px 8px;font-size:10px}
+      .content{padding:18px 12px 30px}
+      .page-intro{margin-bottom:17px}
+      .page-intro h2{font-size:20px}
+      .page-intro p{font-size:11px}
+      .request-panel{padding:18px 15px}
+      .panel-heading{margin-bottom:17px}
+      .panel-heading h3{font-size:14px}
+      .cost-pill{font-size:9px;padding:6px 7px}
+      .action-row{align-items:stretch;flex-direction:column}
+      .action-row .primary{width:100%;min-height:45px}
+      .admin-panel{padding:18px 15px}
+      .admin-form{grid-template-columns:1fr 1fr}
+      .admin-form .field:first-child,.admin-form .field:nth-child(3){grid-column:1/-1}
+      .admin-form .primary{grid-column:1/-1;width:100%}
+      .result-grid{grid-template-columns:1fr;padding:12px}
+      .result-head{padding:12px 13px}
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Menú de herramientas">
+  <div class="side-head">
+    <div class="brand-icon" aria-hidden="true">✦</div>
+    <div><div class="brand-word">SPECTER DATA</div><span class="brand-caption">SECURE WORKSPACE</span></div>
+  </div>
+  <div class="side-scroll">
+    <p class="nav-label">RENIEC / IDENTIDAD</p>
+    <ul class="nav-list">
+      <li><button class="nav-item active" type="button" data-tool="dni"><span class="nav-icon">🪪</span><span>DNI Reniec</span><span class="nav-cost">5 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="dnit"><span class="nav-icon">🖼️</span><span>DNIT (4 Fotos)</span><span class="nav-cost">6 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="dnivel"><span class="nav-icon">💳</span><span>DNI Electrónico</span><span class="nav-cost">10 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="dniv"><span class="nav-icon">🪪</span><span>DNI Virtual</span><span class="nav-cost">10 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="nm"><span class="nav-icon">🔎</span><span>Búsqueda Nombres</span><span class="nav-cost">5 CR</span></button></li>
+    </ul>
+    <p class="nav-label">LOCALIZACIÓN / RED</p>
+    <ul class="nav-list">
+      <li><button class="nav-item" type="button" data-tool="ip"><span class="nav-icon">🌐</span><span>Localizar IP Pública</span><span class="nav-cost">10 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="dns"><span class="nav-icon">⌘</span><span>Resolución DNS</span><span class="nav-cost">2 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="dir"><span class="nav-icon">📍</span><span>Direcciones por DNI</span><span class="nav-cost">6 CR</span></button></li>
+    </ul>
+    <p class="nav-label">VEHÍCULOS (SUNARP)</p>
+    <ul class="nav-list">
+      <li><button class="nav-item" type="button" data-tool="pla"><span class="nav-icon">🚗</span><span>Placa + Fotos</span><span class="nav-cost">4 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="plat"><span class="nav-icon">📑</span><span>Ficha Vehicular + Titular</span><span class="nav-cost">6 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="hsoat"><span class="nav-icon">🛡️</span><span>Historial SOAT</span><span class="nav-cost">10 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="revtec"><span class="nav-icon">🔧</span><span>Revisión Técnica</span><span class="nav-cost">10 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="denpla"><span class="nav-icon">🚨</span><span>Denuncias Placa (PDF)</span><span class="nav-cost">40 CR</span></button></li>
+    </ul>
+    <p class="nav-label">LEGAL / FISCALÍA / PNP</p>
+    <ul class="nav-list">
+      <li><button class="nav-item" type="button" data-tool="den"><span class="nav-icon">🚔</span><span>Denuncias Policiales</span><span class="nav-cost">20 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="denuncias"><span class="nav-icon">📂</span><span>Denuncias (PDFs)</span><span class="nav-cost">60 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="rqh"><span class="nav-icon">⚖️</span><span>Requisitorias (RQ)</span><span class="nav-cost">40 CR</span></button></li>
+    </ul>
+    <p class="nav-label">TELEFONÍA / LABORAL</p>
+    <ul class="nav-list">
+      <li><button class="nav-item" type="button" data-tool="telcel"><span class="nav-icon">📱</span><span>Titular Celular</span><span class="nav-cost">20 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="agv"><span class="nav-icon">👥</span><span>Árbol Genealógico</span><span class="nav-cost">20 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="suel"><span class="nav-icon">💼</span><span>Sueldo / Planilla</span><span class="nav-cost">6 CR</span></button></li>
+      <li><button class="nav-item" type="button" data-tool="facial"><span class="nav-icon">👤</span><span>Reconocimiento Facial</span><span class="nav-cost">60 CR</span></button></li>
+    </ul>
+    <div class="side-note">El menú conserva las solicitudes de consultas 1. Las funciones que implican datos personales sensibles no se conectan a bases privadas desde este panel.</div>
+  </div>
+  <div class="side-bottom">
+    <div class="wallet-label"><span>CRÉDITOS DISPONIBLES</span><span class="wallet-status">CUENTA ACTIVA</span></div>
+    <div class="wallet-value"><span id="sideCredits">—</span> <span>CR</span></div>
+    <button class="buy-button" id="buySide" type="button">＋ Comprar créditos por Telegram</button>
+  </div>
+</aside>
+    <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-button" id="menuToggle" type="button" aria-label="Mostrar u ocultar menú" aria-expanded="false">☰</button>
+        <div class="top-title"><h1 id="topTitle">Geolocalización de IP pública</h1><p>Herramientas de red · SPECTER DATA</p></div>
+        <div class="top-actions">
+          <span class="user-email" id="userEmail">Cargando cuenta…</span>
+          <span class="top-credits"><span id="topCredits">—</span> CR</span>
+          <button class="logout" id="logoutBtn" type="button">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="content" id="mainContent">
+        <div class="page-wrap">
+          <div class="page-intro">
+            <p class="overline">Panel de herramientas</p>
+            <h2 id="pageTitle">Geolocalización de IP</h2>
+            <p id="pageDescription">Consulta información aproximada de red, proveedor y ubicación general de una dirección IP pública.</p>
+          </div>
+
+          <section class="panel request-panel" aria-labelledby="formHeading">
+            <div class="panel-heading">
+              <div><h3 id="formHeading">Nueva consulta</h3><p id="formHelp">Introduce una dirección IP pública para consultar sus datos de red.</p></div>
+              <span class="cost-pill" id="costPill">10 CRÉDITOS</span>
+            </div>
+            <form id="queryForm">
+              <div class="form-grid">
+                <div class="field"><label id="queryLabel" for="queryInput">DIRECCIÓN IP</label><input id="queryInput" name="query" type="text" placeholder="Ej. 8.8.8.8" autocomplete="off" spellcheck="false" required></div>
+              </div>
+              <div class="action-row">
+                <div class="cost-text">Costo de la herramienta: <strong id="costText">10 créditos</strong></div>
+                <button class="primary" id="runBtn" type="submit">Ejecutar consulta&nbsp; →</button>
+              </div>
+              <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+            </form>
+          </section>
+          <div class="results" id="results"></div>
+
+          <section class="panel admin-panel" id="adminPanel" aria-labelledby="adminHeading">
+            <div class="admin-title"><h3 id="adminHeading">Administración de créditos</h3><span class="admin-badge">SOLO ADMIN</span></div>
+            <p class="admin-desc">Añade saldo a una cuenta registrada. Esta operación se valida en el servidor y queda guardada en el historial.</p>
+            <form class="admin-form" id="creditForm">
+              <div class="field"><label for="targetEmail">CORREO DEL USUARIO</label><input id="targetEmail" type="email" placeholder="usuario@correo.com" required></div>
+              <div class="field"><label for="creditAmount">CANTIDAD</label><input id="creditAmount" type="number" min="1" max="100000" step="1" placeholder="100" required></div>
+              <div class="field"><label for="creditNote">CONCEPTO (OPCIONAL)</label><input id="creditNote" type="text" maxlength="160" placeholder="Compra de créditos"></div>
+              <button class="primary" id="addCreditsBtn" type="submit">＋ Sumar créditos</button>
+            </form>
+            <div class="feedback" id="adminFeedback" role="status" aria-live="polite"></div>
+            <div class="history"><h4>Movimientos recientes</h4><div class="history-list" id="historyList"><div class="empty-state">No hay movimientos recientes.</div></div></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const TOOLS = {
+      dni:{title:'🪪 RENIEC — Consulta DNI Completa',description:'Formulario de consulta DNI. La integración de datos personales requiere una fuente autorizada y credenciales del servidor.',help:'Introduce el DNI para la consulta autorizada.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:5,field:'dni',safe:false},
+      dnit:{title:'🖼️ RENIEC — DNIT (4 Fotografías)',description:'Consulta de DNIT. La entrega de fotografías personales requiere una fuente autorizada.',help:'Introduce el DNI para la consulta autorizada.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:6,field:'dni',safe:false},
+      dnivel:{title:'💳 RENIEC — DNI Electrónico',description:'Consulta especializada de emisión de DNI Electrónico.',help:'Introduce el DNI para la consulta autorizada.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:10,field:'dni',safe:false},
+      dniv:{title:'🪪 RENIEC — DNI Virtual',description:'Consulta de DNI Virtual.',help:'Introduce el DNI para la consulta autorizada.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:10,field:'dni',safe:false},
+      nm:{title:'🔎 BÚSQUEDA — Por Nombres y Apellidos',description:'Búsqueda de personas por nombre. Requiere una fuente autorizada.',help:'Completa los nombres y apellidos.',label:'DATOS DE BÚSQUEDA',placeholder:'Nombre y apellidos',cost:5,field:'query',safe:false,multi:true},
+      ip:{title:'🌐 RED — Localización IP Pública',description:'Geolocalización aproximada, ISP y ASN de una IP pública.',help:'Introduce una dirección IP pública.',label:'DIRECCIÓN IP',placeholder:'Ej. 8.8.8.8',cost:10,endpoint:'/api/consult/ip',field:'ip',safe:true},
+      dns:{title:'⌘ RED — Resolución DNS',description:'Comprueba las direcciones IP a las que resuelve un dominio.',help:'Introduce el dominio que deseas resolver.',label:'NOMBRE DE DOMINIO',placeholder:'Ej. ejemplo.com',cost:2,endpoint:'/api/consult/dns',field:'domain',safe:true},
+      dir:{title:'📍 RENIEC — Historial de Direcciones',description:'Consulta de direcciones asociadas a un DNI. Requiere autorización y una fuente legítima.',help:'Introduce el DNI para una consulta autorizada.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:6,field:'dni',safe:false},
+      pla:{title:'🚗 SUNARP — Placa y Fotografías',description:'Consulta de placa vehicular. La disponibilidad de fotografías depende de una fuente autorizada.',help:'Introduce la placa.',label:'NÚMERO DE PLACA',placeholder:'Ej. ABC123',cost:4,field:'placa',safe:false},
+      plat:{title:'📑 SUNARP — Ficha Técnica y Propietarios',description:'Ficha vehicular y titularidad. Los datos de propietarios son personales y requieren autorización.',help:'Introduce la placa.',label:'NÚMERO DE PLACA',placeholder:'Ej. ABC123',cost:6,field:'placa',safe:false},
+      hsoat:{title:'🛡️ MTC — Historial de SOAT',description:'Historial de SOAT vehicular.',help:'Introduce la placa.',label:'NÚMERO DE PLACA',placeholder:'Ej. ABC123',cost:10,field:'placa',safe:false},
+      revtec:{title:'🔧 MTC — Revisiones Técnicas',description:'Historial de revisiones técnicas vehiculares.',help:'Introduce la placa.',label:'NÚMERO DE PLACA',placeholder:'Ej. ABC123',cost:10,field:'placa',safe:false},
+      denpla:{title:'🚨 VEHÍCULOS — Denuncias Policiales Placa',description:'Consulta de denuncias vinculadas a una placa. Requiere acceso autorizado.',help:'Introduce la placa.',label:'NÚMERO DE PLACA',placeholder:'Ej. ABC123',cost:40,field:'placa',safe:false},
+      den:{title:'🚔 PNP — Denuncias por Ciudadano',description:'Historial de denuncias asociado a una persona. Requiere una fuente oficial y autorización.',help:'Introduce el DNI.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:20,field:'dni',safe:false},
+      denuncias:{title:'📂 PNP — Denuncias Completas en PDF',description:'Documentos de denuncias policiales. Requiere acceso oficial autorizado.',help:'Introduce el DNI.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:60,field:'dni',safe:false},
+      rqh:{title:'⚖️ PODER JUDICIAL — Requisitorias (RQ)',description:'Verificación judicial. Debe realizarse mediante una fuente oficial autorizada.',help:'Introduce el DNI.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:40,field:'dni',safe:false},
+      telcel:{title:'📱 TELEFONÍA — Búsqueda de Titular',description:'Titularidad de una línea móvil. Es un dato personal y requiere autorización.',help:'Introduce el número de celular.',label:'NÚMERO CELULAR',placeholder:'Ej. 987654321',cost:20,field:'tel',safe:false},
+      agv:{title:'👥 RENIEC — Árbol Genealógico Familiar',description:'Relaciones familiares asociadas a una persona. Requiere una fuente autorizada.',help:'Introduce el DNI.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:20,field:'dni',safe:false},
+      suel:{title:'💼 PLANILLA — Sueldo y Renta de Quinta',description:'Información laboral y salarial personal. Requiere autorización.',help:'Introduce el DNI.',label:'DNI (8 DÍGITOS)',placeholder:'Ej. 73618900',cost:6,field:'dni',safe:false},
+      facial:{title:'👤 BIOMETRÍA — Reconocimiento Facial Top',description:'Identificación biométrica por fotografía. Esta función no se conecta a bases biométricas desde este panel.',help:'Selecciona una fotografía.',label:'FOTOGRAFÍA',placeholder:'JPG/PNG',cost:60,field:'file',safe:false}
+    };
+    let currentTool = 'ip';
+    let telegramUsername = 'specter_os';
+    let isAdmin = false;
+
+    // Música ambiental original. Se inicia tras el primer toque/clic porque
+    // Android y otros navegadores bloquean el audio audible sin interacción.
+    let ambientStarted = false;
+    function startAmbientAudio(){
+      if(ambientStarted) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if(!AudioCtx) return;
+      try{
+        const ctx = new AudioCtx(); const master = ctx.createGain(); const filter = ctx.createBiquadFilter();
+        filter.type='lowpass'; filter.frequency.value=850; filter.Q.value=.35; master.gain.value=.055;
+        filter.connect(master); master.connect(ctx.destination);
+        const chords=[[146.83,220,293.66],[116.54,174.61,233.08],[87.31,130.81,174.61],[130.81,196,261.63]];
+        const voices=chords[0].map((frequency,i)=>{const osc=ctx.createOscillator();const gain=ctx.createGain();osc.type='sine';osc.frequency.value=frequency;gain.gain.value=[.24,.13,.07][i];osc.connect(gain);gain.connect(filter);osc.start();return osc;});
+        let step=0;setInterval(()=>{step=(step+1)%chords.length;chords[step].forEach((frequency,i)=>voices[i].frequency.setTargetAtTime(frequency,ctx.currentTime,2.8));},9000);
+        ambientStarted=true;
+      }catch(error){/* El panel sigue operativo si el navegador no admite audio. */}
+    }
+    document.addEventListener('pointerdown',startAmbientAudio,{once:true});
+    document.addEventListener('keydown',startAmbientAudio,{once:true});
+
+    async function api(path, options={}){
+      const response=await fetch(path,{credentials:'same-origin',...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});
+      const data=await response.json().catch(()=>({error:'Respuesta no válida del servidor.'}));
+      if(!response.ok){if(Number.isInteger(data.credits))updateCredits(data.credits);throw new Error(data.error||'No se pudo completar la solicitud.');}
+      return data;
+    }
+    function updateCredits(value){
+      document.getElementById('sideCredits').textContent=Number(value).toLocaleString('es-PE');
+      document.getElementById('topCredits').textContent=Number(value).toLocaleString('es-PE');
+    }
+    function feedback(id,text,type){const el=document.getElementById(id);el.textContent=text;el.className=`feedback ${type}`;}
+    function clearFeedback(id){const el=document.getElementById(id);el.textContent='';el.className='feedback';}
+    function setTool(key){
+      currentTool=key;const tool=TOOLS[key];
+      document.querySelectorAll('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.tool===key));
+      document.getElementById('topTitle').textContent=tool.title;
+      document.getElementById('pageTitle').textContent=tool.title;
+      document.getElementById('pageDescription').textContent=tool.description;
+      document.getElementById('formHeading').textContent=tool.title;
+      document.getElementById('formHelp').textContent=tool.help;
+      document.getElementById('queryLabel').textContent=tool.label;
+      document.getElementById('queryInput').placeholder=tool.placeholder;
+      document.getElementById('queryInput').value='';
+      document.getElementById('costPill').textContent=`${tool.cost} CRÉDITOS`;
+      document.getElementById('costText').textContent=`${tool.cost} créditos`;
+      clearFeedback('feedback');
+      document.getElementById('results').replaceChildren();
+      closeMobileMenu();
+    }
+    function closeMobileMenu(){document.body.classList.remove('menu-open');document.getElementById('menuToggle').setAttribute('aria-expanded','false');}
+    document.querySelectorAll('.nav-item').forEach(item=>item.addEventListener('click',()=>setTool(item.dataset.tool)));
+    document.getElementById('menuToggle').addEventListener('click',()=>{
+      if(window.matchMedia('(max-width: 850px)').matches){const open=!document.body.classList.contains('menu-open');document.body.classList.toggle('menu-open',open);document.getElementById('menuToggle').setAttribute('aria-expanded',String(open));}
+      else{document.body.classList.toggle('sidebar-collapsed');}
+    });
+    document.getElementById('sidebarScrim').addEventListener('click',closeMobileMenu);
+    window.addEventListener('resize',()=>{if(!window.matchMedia('(max-width: 850px)').matches)closeMobileMenu();});
+
+    function renderResult(title,entries){
+      const card=document.createElement('article');card.className='result-card';
+      const head=document.createElement('div');head.className='result-head';
+      const label=document.createElement('strong');label.textContent=title;
+      const time=document.createElement('span');time.textContent=new Date().toLocaleString('es-PE');
+      head.append(label,time);
+      const grid=document.createElement('div');grid.className='result-grid';
+      entries.forEach(([key,value])=>{
+        const item=document.createElement('div');item.className='result-item';
+        const small=document.createElement('small');small.textContent=key;
+        const strong=document.createElement('strong');strong.textContent=(value===null||value===undefined||value==='')?'No disponible':String(value);
+        item.append(small,strong);grid.append(item);
+      });
+      card.append(head,grid);document.getElementById('results').replaceChildren(card);
+    }
+
+    document.getElementById('queryForm').addEventListener('submit',async(event)=>{
+      event.preventDefault();clearFeedback('feedback');
+      const tool=TOOLS[currentTool];
+      const value=document.getElementById('queryInput').value.trim();
+      if(!value){feedback('feedback','Completa el campo antes de continuar.','error');return;}
+      if(!tool.safe){
+        feedback('feedback','Esta solicitud conserva su formulario y costo original, pero no se conecta a una base de datos privada desde el panel. Para operar datos personales necesitas una fuente oficial y autorización correspondiente.','error');
+        return;
+      }
+      const button=document.getElementById('runBtn');button.disabled=true;button.textContent='Consultando…';
+      try{
+        const data=await api(tool.endpoint,{method:'POST',body:JSON.stringify({[tool.field]:value})});
+        updateCredits(data.credits);
+        if(currentTool==='ip'){
+          const d=data.data;
+          renderResult('Resultado · Dirección IP', [['IP consultada',d.ip],['País',d.country],['Región',d.region],['Ciudad',d.city],['Código postal',d.postal],['Proveedor (ISP)',d.isp],['Organización',d.org],['Coordenadas aproximadas',d.latitude!==null&&d.longitude!==null?`${d.latitude}, ${d.longitude}`:'No disponibles']]);
+        }else{
+          renderResult('Resultado · Resolución DNS', [['Dominio',data.domain],['Direcciones encontradas',data.records.length],...data.records.map((record,index)=>[`Registro ${index+1} · IPv${record.family}`,record.address])]);
+        }
+        feedback('feedback',`Consulta completada. Se descontaron ${tool.cost} créditos.`,'success');
+      }catch(error){feedback('feedback',error.message,'error');}
+      finally{button.disabled=false;button.textContent='Ejecutar consulta  →';}
+    });
+
+    function telegramBuy(){
+      const email=document.getElementById('userEmail').dataset.email||'';
+      const message=`Hola, deseo comprar créditos para SPECTER DATA. Mi correo de cuenta es: ${email}.`;
+      const url=`https://t.me/${encodeURIComponent(telegramUsername)}?text=${encodeURIComponent(message)}`;
+      window.open(url,'_blank','noopener,noreferrer');
+    }
+    document.getElementById('buySide').addEventListener('click',telegramBuy);
+
+    async function loadAdminHistory(){
+      const list=document.getElementById('historyList');
+      try{
+        const data=await api('/api/admin/credits/recent');list.replaceChildren();
+        if(!data.rows.length){const empty=document.createElement('div');empty.className='empty-state';empty.textContent='Todavía no hay movimientos.';list.append(empty);return;}
+        data.rows.forEach(row=>{
+          const line=document.createElement('div');line.className='history-row';
+          const left=document.createElement('span');left.textContent=`${row.email} · ${row.note||row.action}`;
+          const right=document.createElement('strong');right.textContent=`${row.amount > 0 ? '+' : ''}${row.amount} CR`;
+          line.append(left,right);list.append(line);
+        });
+      }catch(error){list.textContent='No se pudo cargar el historial.';}
+    }
+
+    document.getElementById('creditForm').addEventListener('submit',async(event)=>{
+      event.preventDefault();clearFeedback('adminFeedback');
+      const email=document.getElementById('targetEmail').value.trim().toLowerCase();
+      const amount=Number(document.getElementById('creditAmount').value);
+      const note=document.getElementById('creditNote').value.trim();
+      const button=document.getElementById('addCreditsBtn');
+      button.disabled=true;button.textContent='Guardando…';
+      try{
+        const data=await api('/api/admin/credits/add',{method:'POST',body:JSON.stringify({email,amount,note})});
+        feedback('adminFeedback',`Se añadieron ${amount} créditos a ${data.email}. Nuevo saldo: ${data.credits} CR.`,'success');
+        document.getElementById('creditForm').reset();await loadAdminHistory();
+      }catch(error){feedback('adminFeedback',error.message,'error');}
+      finally{button.disabled=false;button.textContent='＋ Sumar créditos';}
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click',async()=>{
+      try{await api('/api/auth/logout',{method:'POST'});}catch(error){}
+      window.location.replace('/login.html');
+    });
+
+    async function init(){
+      try{
+        const me=await api('/api/me',{cache:'no-store'});
+        document.getElementById('userEmail').textContent=me.user.email;
+        document.getElementById('userEmail').dataset.email=me.user.email;
+        updateCredits(me.user.credits);
+        isAdmin=me.user.isAdmin===true;
+        try{
+          const config=await api('/api/config',{cache:'no-store'});
+          telegramUsername=config.telegramUsername||'specter_os';
+        }catch(_){ telegramUsername='specter_os'; }
+        if(isAdmin){document.getElementById('adminPanel').classList.add('visible');loadAdminHistory();}
+      }catch(error){
+        window.location.replace('/login.html?expired=1');
+      }
+    }
+    init();
+  </script>
+</body>
+</html>
