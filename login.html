@@ -318,11 +318,7 @@ const passHint = document.getElementById("passHint");
   audio.volume = CONFIG.MUSIC_VOLUME;
   btn.style.display = "flex";
 
-  function refresh(){
-    const playing = !audio.paused;
-    btn.classList.toggle("playing", playing);
-    label.textContent = playing ? "Pausar música" : "Reproducir música";
-  }
+
 
   function tryPlay(){
     return audio.play().then(refresh).catch(refresh);
