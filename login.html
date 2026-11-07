@@ -417,6 +417,11 @@ function saveUsers(users) {
 function resetCaptcha(){
   try { if (window.hcaptcha) hcaptcha.reset(); } catch (e) {}
 }
+function refresh(){
+    const playing = !audio.paused;
+    btn.classList.toggle("playing", playing);
+    label.textContent = playing ? "Pausar música" : "Reproducir música";
+  }
 
 /* ---------- Envío ---------- */
 document.getElementById("authForm").addEventListener("submit", (e) => {
