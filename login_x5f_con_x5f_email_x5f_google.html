@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auth App - Firebase Real</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  * {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .animate-in {
+    animation: fadeInUp 0.6s ease-out;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .btn-primary {
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+  input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ring-color);
+  }
+</style>
+</head>
+<body class="min-h-screen transition-colors duration-500" style="background: #0a0a0a;" id="bodyBg">
+  
+<!-- Header con logo que define el color -->
+<header class="p-4 md:p-6">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <img id="brandLogo" crossorigin="anonymous" alt="Logo" class="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover shadow-lg">
+      <h1 class="text-xl md:text-2xl font-bold text-white" id="brandName">Tu Marca</h1>
+    </div>
+    <button id="logoutBtn" class="hidden text-white/80 hover:text-white text-sm md:text-base">
+      <i class="fa-solid fa-right-from-bracket mr-2"></i>Salir
+    </button>
+  </div>
+</header>
+
+<!-- Vista principal -->
+<main class="px-4 pb-12">
+  <div class="max-w-md mx-auto mt-8 md:mt-16">
+    
+    <!-- Card Login/Register -->
+    <div id="authCard" class="glass rounded-3xl p-6 md:p-8 shadow-2xl animate-in">
+      
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-8 p-1 bg-black/20 rounded-xl">
+        <button id="loginTab" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all text-white bg-white/10">
+          Iniciar Sesión
+        </button>
+        <button id="registerTab" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all text-white/60">
+          Registrarse
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <form id="authForm" class="space-y-4">
+        <div id="nameField" class="hidden">
+          <label class="block text-sm font-medium text-white/80 mb-2">Nombre completo</label>
+          <input type="text" id="nameInput" 
+                 class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 transition-all"
+                 placeholder="Juan Pérez">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-white/80 mb-2">Correo electrónico</label>
+          <input type="email" id="emailInput" required
+                 class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 transition-all"
+                 placeholder="tu@correo.com">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-white/80 mb-2">Contraseña</label>
+          <input type="password" id="passwordInput" required minlength="6"
+                 class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 transition-all"
+                 placeholder="Mínimo 6 caracteres">
+        </div>
+
+        <div id="errorMsg" class="hidden text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3"></div>
+        <div id="successMsg" class="hidden text-sm text-green-400 bg-green-500/10 border border-green-500/20 rounded-lg p-3"></div>
+
+        <button type="submit" id="submitBtn" 
+                class="w-full btn-primary py-3.5 rounded-xl font-semibold text-white shadow-lg">
+          <span id="btnText">Iniciar Sesión</span>
+          <i id="btnLoader" class="fa-solid fa-spinner fa-spin ml-2 hidden"></i>
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-4 my-6">
+        <div class="flex-1 h-px bg-white/10"></div>
+        <span class="text-xs text-white/40">O CONTINÚA CON</span>
+        <div class="flex-1 h-px bg-white/10"></div>
+      </div>
+
+      <!-- Google Button -->
+      <button id="googleBtn" 
+              class="w-full btn-primary flex items-center justify-center gap-3 py-3.5 rounded-xl font-semibold bg-white text-gray-800 shadow-lg">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span id="googleBtnText">Iniciar con Google</span>
+      </button>
+
+    </div>
+
+    <!-- Dashboard tras login -->
+    <div id="dashboard" class="hidden glass rounded-3xl p-6 md:p-8 shadow-2xl animate-in">
+      <div class="text-center">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center">
+          <i class="fa-solid fa-user text-3xl text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-white mb-2">¡Bienvenido!</h2>
+        <p class="text-white/60 text-sm mb-6" id="userEmail">usuario@correo.com</p>
+        
+        <div class="bg-black/20 rounded-xl p-4 mb-6 text-left">
+          <h3 class="text-white/80 font-semibold text-sm mb-3">Datos guardados en Firestore:</h3>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="text-white/50">UID:</span>
+              <span class="text-white/80 font-mono" id="userUid">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-white/50">Nombre:</span>
+              <span class="text-white/80" id="userName">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-white/50">Registro:</span>
+              <span class="text-white/80" id="userCreated">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-white/50">Último login:</span>
+              <span class="text-white/80" id="userLastLogin">-</span>
+            </div>
+          </div>
+        </div>
+
+        <button id="updateProfileBtn" class="w-full py-3 rounded-xl bg-white/10 text-white font-semibold hover:bg-white/20 transition-all">
+          <i class="fa-solid fa-pen mr-2"></i>Actualizar Perfil
+        </button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+  // REEMPLAZA ESTO CON TU CONFIG DE FIREBASE
+  const firebaseConfig = {
+    apiKey: "REEMPLAZA_CON_TU_API_KEY",
+    authDomain: "REEMPLAZA_CON_TU_AUTH_DOMAIN",
+    projectId: "REEMPLAZA_CON_TU_PROJECT_ID",
+    storageBucket: "REEMPLAZA_CON_TU_STORAGE_BUCKET",
+    messagingSenderId: "REEMPLAZA_CON_TU_SENDER_ID",
+    appId: "REEMPLAZA_CON_TU_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const googleProvider = new GoogleAuthProvider();
+
+  // Elementos DOM
+  const loginTab = document.getElementById('loginTab');
+  const registerTab = document.getElementById('registerTab');
+  const nameField = document.getElementById('nameField');
+  const authForm = document.getElementById('authForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText = document.getElementById('btnText');
+  const btnLoader = document.getElementById('btnLoader');
+  const googleBtn = document.getElementById('googleBtn');
+  const googleBtnText = document.getElementById('googleBtnText');
+  const errorMsg = document.getElementById('errorMsg');
+  const successMsg = document.getElementById('successMsg');
+  const authCard = document.getElementById('authCard');
+  const dashboard = document.getElementById('dashboard');
+  const logoutBtn = document.getElementById('logoutBtn');
+  
+  let isLogin = true;
+
+  // Cambiar entre Login y Register
+  loginTab.addEventListener('click', () => {
+    isLogin = true;
+    loginTab.classList.add('bg-white/10', 'text-white');
+    loginTab.classList.remove('text-white/60');
+    registerTab.classList.remove('bg-white/10', 'text-white');
+    registerTab.classList.add('text-white/60');
+    nameField.classList.add('hidden');
+    btnText.textContent = 'Iniciar Sesión';
+    googleBtnText.textContent = 'Iniciar con Google';
+    hideMessages();
+  });
+
+  registerTab.addEventListener('click', () => {
+    isLogin = false;
+    registerTab.classList.add('bg-white/10', 'text-white');
+    registerTab.classList.remove('text-white/60');
+    loginTab.classList.remove('bg-white/10', 'text-white');
+    loginTab.classList.add('text-white/60');
+    nameField.classList.remove('hidden');
+    btnText.textContent = 'Crear Cuenta';
+    googleBtnText.textContent = 'Registra con Google';
+    hideMessages();
+  });
+
+  // Submit Email/Password
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value;
+    const password = document.getElementById('passwordInput').value;
+    const name = document.getElementById('nameInput').value;
+    
+    showLoader(true);
+    hideMessages();
+
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+        await updateUserLastLogin(auth.currentUser.uid);
+      } else {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(userCred.user, { displayName: name });
+        await createUserDocument(userCred.user, name);
+      }
+      showSuccess('¡Éxito! Redirigiendo...');
+    } catch (error) {
+      showError(getErrorMessage(error.code));
+    } finally {
+      showLoader(false);
+    }
+  });
+
+  // Google Sign In
+  googleBtn.addEventListener('click', async () => {
+    showLoader(true, true);
+    hideMessages();
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (!userDoc.exists()) {
+        await createUserDocument(user, user.displayName);
+      } else {
+        await updateUserLastLogin(user.uid);
+      }
+      showSuccess('¡Conectado con Google!');
+    } catch (error) {
+      showError(getErrorMessage(error.code));
+    } finally {
+      showLoader(false, true);
+    }
+  });
+
+  // Logout
+  logoutBtn.addEventListener('click', () => signOut(auth));
+
+  // Observador de estado de auth
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      authCard.classList.add('hidden');
+      dashboard.classList.remove('hidden');
+      logoutBtn.classList.remove('hidden');
+      await loadUserData(user);
+    } else {
+      authCard.classList.remove('hidden');
+      dashboard.classList.add('hidden');
+      logoutBtn.classList.add('hidden');
+    }
+  });
+
+  // Funciones Firestore
+  async function createUserDocument(user, name) {
+    await setDoc(doc(db, 'users', user.uid), {
+      uid: user.uid,
+      email: user.email,
+      displayName: name || user.displayName || 'Usuario',
+      photoURL: user.photoURL || null,
+      createdAt: serverTimestamp(),
+      lastLogin: serverTimestamp(),
+      provider: user.providerData[0].providerId
+    });
+  }
+
+  async function updateUserLastLogin(uid) {
+    await updateDoc(doc(db, 'users', uid), {
+      lastLogin: serverTimestamp()
+    });
+  }
+
+  async function loadUserData(user) {
+    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('userUid').textContent = user.uid.substring(0, 12) + '...';
+    document.getElementById('userName').textContent = user.displayName || 'Sin nombre';
+    
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      document.getElementById('userCreated').textContent = data.createdAt?.toDate().toLocaleDateString() || '-';
+      document.getElementById('userLastLogin').textContent = data.lastLogin?.toDate().toLocaleString() || '-';
+    }
+  }
+
+  // Helpers UI
+  function showLoader(show, isGoogle = false) {
+    if (isGoogle) {
+      googleBtn.disabled = show;
+      googleBtn.classList.toggle('opacity-50', show);
+    } else {
+      btnLoader.classList.toggle('hidden', !show);
+      submitBtn.disabled = show;
+    }
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.remove('hidden');
+  }
+
+  function showSuccess(msg) {
+    successMsg.textContent = msg;
+    successMsg.classList.remove('hidden');
+  }
+
+  function hideMessages() {
+    errorMsg.classList.add('hidden');
+    successMsg.classList.add('hidden');
+  }
+
+  function getErrorMessage(code) {
+    const errors = {
+      'auth/email-already-in-use': 'Este correo ya está registrado',
+      'auth/invalid-email': 'Correo inválido',
+      'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres',
+      'auth/user-not-found': 'Usuario no encontrado',
+      'auth/wrong-password': 'Contraseña incorrecta',
+      'auth/popup-closed-by-user': 'Ventana cerrada. Intenta de nuevo',
+      'auth/network-request-failed': 'Error de red. Revisa tu conexión'
+    };
+    return errors[code] || 'Ocurrió un error. Intenta de nuevo';
+  }
+
+  // Color adaptivo según imagen
+  const colorThief = new ColorThief();
+  const logo = document.getElementById('brandLogo');
+  const bodyBg = document.getElementById('bodyBg');
+  
+  logo.addEventListener('load', function() {
+    try {
+      const dominantColor = colorThief.getColor(logo);
+      const [r, g, b] = dominantColor;
+      const darkerColor = `rgb(${Math.max(0, r-40)}, ${Math.max(0, g-40)}, ${Math.max(0, b-40)})`;
+      const gradient = `linear-gradient(135deg, ${darkerColor} 0%, rgb(${r}, ${g}, ${b}) 100%)`;
+      
+      bodyBg.style.background = gradient;
+      document.documentElement.style.setProperty('--ring-color', `rgba(${r}, ${g}, ${b}, 0.3)`);
+      
+      const buttons = document.querySelectorAll('#submitBtn');
+      buttons.forEach(btn => {
+        btn.style.background = `linear-gradient(135deg, rgb(${r}, ${g}, ${b}) 0%, ${darkerColor} 100%)`;
+      });
+    } catch(e) {
+      console.log('No se pudo extraer color:', e);
+    }
+  });
+
+  if (logo.complete) logo.dispatchEvent(new Event('load'));
+</script>
+
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
