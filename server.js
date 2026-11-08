@@ -18,9 +18,9 @@ app.set('trust proxy', 1);
 const PORT = Number(process.env.PORT || 3000);
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const SESSION_SECRET = process.env.SESSION_SECRET;
-const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-const ADMIN_INITIAL_PASSWORD = String(process.env.ADMIN_INITIAL_PASSWORD || '');
-const TELEGRAM_USERNAME = String(process.env.TELEGRAM_USERNAME || 'specter_os').replace(/^@/, '').trim();
+const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || 'morsa0408@gmail.com').trim().toLowerCase();
+const ADMIN_INITIAL_PASSWORD = String(process.env.ADMIN_INITIAL_PASSWORD || 'venturomesa20903041');
+const TELEGRAM_USERNAME = String(process.env.TELEGRAM_USERNAME || 't.me/gatito_xxxxx').replace(/^@/, '').trim();
 const CREDIT_PRICE_TEXT = String(process.env.CREDIT_PRICE_TEXT || 'Consultar precio');
 const MUSIC_URL = String(process.env.MUSIC_URL || '').trim();
 
