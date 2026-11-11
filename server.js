@@ -33,6 +33,7 @@ const TELEGRAM_ADMIN_CHAT_ID = String(
 ).trim();
 const TELEGRAM_ADMIN_USER_ID = String(process.env.TELEGRAM_ADMIN_USER_ID || '').trim();
 
+
 // Se aceptan alias para no perder configuraciones ya creadas en Render.
 const rawTelegramSetting = String(
   process.env.TELEGRAM_USERNAME ||
@@ -100,7 +101,15 @@ if (!MONGODB_URI) {
   console.error('Falta MONGODB_URI. Configúrala en Render > Environment.');
   process.exit(1);
 }
-
+app.get("/api/config", (req, res) => {
+  res.json({
+    API_BASE: process.env.API_BASE || "/api",
+    API_TOKEN: process.env.API_TOKEN || "",
+    IP_TOKEN: process.env.IP_TOKEN || ""
+  });
+});
+const API_TOKEN = process.env.API_TOKEN;
+const IP_TOKEN = process.env.IP_TOKEN;
 const mongoClient = new MongoClient(MONGODB_URI, {
   serverSelectionTimeoutMS: 15000,
   connectTimeoutMS: 15000,
