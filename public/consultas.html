@@ -993,9 +993,9 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-se
 
 <script>
 const CONFIG = {
-  apiBase: localStorage.getItem("specter_api_base") || "/api",
-  token: localStorage.getItem("specter_token") || "",
-  ipToken: localStorage.getItem("specter_ip_token") || ""
+  apiBase: window.APP_CONFIG?.API_BASE || "/api",
+  token: window.APP_CONFIG?.API_TOKEN || "",
+  ipToken: window.APP_CONFIG?.IP_TOKEN || ""
 };
 
 let currentService = "dni";
